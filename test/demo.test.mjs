@@ -34,9 +34,13 @@ test('browser entrypoint initialises controls, builds 143 swatches, and changes 
   };
   Object.defineProperty(globalThis, 'navigator', { configurable: true, value: {clipboard: {writeText: async () => {}}} });
   get('theme-select').value = 'light';
+  get('category-count').value = '8';
+  get('category-contrast').value = '3';
   get('vision-select').value = 'normal';
   await import('../demo/app.js');
   assert.equal(get('scales').children.length,13);
+  assert.equal(get('category-colors').children.length,8);
+  assert.match(get('category-report').textContent,/weakest ΔEOK/);
   const count=get('scales').children.reduce((total,row)=>total + row.children.at(-1).children.length,0);
   assert.equal(count,143);
   assert.equal(get('audit-rows').children.length,78);
@@ -47,6 +51,7 @@ test('browser entrypoint initialises controls, builds 143 swatches, and changes 
   get('theme-select').value='dark';
   get('theme-select').listeners.get('change')();
   assert.equal(get('preview').props.get('--pv-background'),createPalette('#2563EB').dark.background);
+  assert.equal(get('category-colors').children.length,8);
   assert.equal(get('preview').props.get('--pv-primary-pressed'),createPalette('#2563EB').interactions.dark.primaryPressed);
   assert.match(get('css-preview').textContent,/--palette-primary-50:/);
   // Three new DTCG / design-system downloads are wired to real handlers.
@@ -64,5 +69,9 @@ test('browser entrypoint initialises controls, builds 143 swatches, and changes 
   get('vision-select').listeners.get('change')();
   assert.notEqual(get('preview').props.get('--pv-primary'), createPalette('#2563EB').dark.primary);
   assert.match(get('vision-report').textContent,/Smallest simulated/);
+  get('category-count').value='12';
+  get('category-count').listeners.get('change')();
+  assert.equal(get('category-colors').children.length,12);
+  assert.equal(typeof get('download-category-button').listeners.get('click'),'function');
   // A DOM-API interaction smoke test, not a rendered-browser accessibility audit.
 });

@@ -12,7 +12,7 @@
   <div class="page">
     <header class="masthead">
       <div class="logo"><span class="logo-mark">C</span><div><b>Color Foundry</b><small>Mathematical design token engine</small></div></div>
-      <div class="version">ENGINE v0.8 · OKLCH / P3 / DTCG / SVELTEKIT</div>
+      <div class="version">ENGINE v0.9 · OKLCH / P3 / CATEGORICAL / SVELTEKIT</div>
     </header>
 
     <main>
@@ -58,6 +58,18 @@
         <div id="scales" class="scale-list"></div><p class="footnote">Display P3 tokens are exported separately behind feature and gamut checks. A standard sRGB display shows the fallback colours.</p>
       </section>
 
+      <section class="section" aria-labelledby="category-title">
+        <div class="section-title"><div><span class="eyebrow">02 / DATA VISUALISATION</span><h2 id="category-title">Accessible categorical colours</h2></div><span class="section-note">Maximum minimum colour separation</span></div>
+        <div class="category-controls">
+          <div class="control-group"><label for="category-count">Number of categories</label><select id="category-count"><option>4</option><option>6</option><option selected>8</option><option>10</option><option>12</option></select></div>
+          <div class="control-group"><label for="category-contrast">Minimum mark contrast</label><select id="category-contrast"><option value="3">3:1</option><option value="4.5">4.5:1</option></select></div>
+          <button type="button" class="button-secondary" id="download-category-button">Export category CSS ↓</button>
+        </div>
+        <div id="category-preview" class="category-preview"><div id="category-colors" class="category-colors"></div></div>
+        <p id="category-report" class="footnote" aria-live="polite"></p>
+        <p class="footnote">Colour-vision simulations are approximate. Charts and maps still need explicit labels, line styles, symbols or patterns; contrast against a solid background does not certify an entire chart.</p>
+      </section>
+
       <section class="section" aria-labelledby="theme-title">
         <div class="section-title"><div><span class="eyebrow">02 / APPLICATION</span><h2 id="theme-title">Live interface preview</h2></div><span class="section-note">WCAG-tested semantic tokens</span></div>
         <div id="preview" class="preview">
@@ -81,7 +93,7 @@
 
       <section class="section" aria-labelledby="css-title"><div class="section-title"><div><span class="eyebrow">05 / OUTPUT</span><h2 id="css-title">Production CSS variables</h2></div><button type="button" class="text-button" id="copy-css-button">Copy CSS</button></div><pre class="code"><code id="css-preview"></code></pre><p class="footnote">The download includes all 143 sRGB scales, Display P3 overrides, accessible interaction-state tokens, and audited semantic themes. Attach <code>data-theme="dark"</code> to your document root to activate the dark tokens.</p></section>
     </main>
-    <footer>Color Foundry v0.8 · Deterministic and dependency-free · sRGB fallbacks + Display P3.</footer>
+    <footer>Color Foundry v0.9 · Deterministic and dependency-free · sRGB fallbacks + Display P3.</footer>
   </div>
   <div role="status" aria-live="polite" class="toast" id="toast"></div>
 </body>

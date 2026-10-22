@@ -6,3 +6,4 @@ export * from './wide-gamut.js';
 export * from './interaction.js';
 export * from './design-system.js';
 export * from './validation.js';
+export * from './categorical.js';

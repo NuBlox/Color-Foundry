@@ -1,8 +1,18 @@
-# Color Foundry v0.8 — browser-verified multi-brand token engine
+# Color Foundry v0.9 — perceptual palette and categorical colour engine
 
 Deterministic TypeScript with **no runtime dependencies**. Generates OKLCH-derived sRGB/Display P3 colour scales, contrast-audited light/dark semantic roles, interaction states and reusable design tokens for SvelteKit.
 
-## v0.8 at a glance
+## v0.9: categorical colour generation
+
+The new `createCategoricalPalette(seed, options)` API generates 2–12 distinct chart and map colours using deterministic OKLCH candidate enumeration, WCAG 2.x mark/background contrast constraints, and maximin OKLab separation across normal vision, protanopia, deuteranopia and tritanopia simulations. It exports readable on-colour labels, CSS custom properties and a transparent pairwise diagnostic report. The browser demo provides a live chart-colour preview and category CSS export. Read [CATEGORICAL.md](docs/CATEGORICAL.md) for maths, limitations and usage.
+
+```ts
+import { createCategoricalPalette } from 'color-foundry-engine';
+const chart = createCategoricalPalette('#2563EB', {count:8,background:'#FFFFFF',minBackgroundContrast:3});
+console.log(chart.css, chart.weakestPair, chart.minimumDistances);
+```
+
+## Existing engine at a glance
 
 - **13 colour families × 11 stops = 143 swatches** per palette, preserving all v0.4 behaviour and the original `createPalette()`, `optimizePalette()` and `palette.css` outputs.
 - **78 existing contrast tests per generated palette** (39 light, 39 dark) across declared semantic and interaction pairs. Not a blanket WCAG conformance statement.
@@ -16,8 +26,8 @@ Deterministic TypeScript with **no runtime dependencies**. Generates OKLCH-deriv
 - **Multi-brand composition:** one shared CSS namespace with independently audited light/dark palettes for Foundry Blue, Evergreen and Royal Plum; brand selection is separate from theme selection.
 - **Chromium-verified token cascade:** optional Python Playwright test checks 200 browser-computed values across 20 explicit/OS/override/fallback configurations, using generated DTCG documents as the expected source.
 - **Generalised pre-paint brand restoration:** supports any valid configured brand slug and cleans up unknown stored brands after hydration.
-- **Reproducible builds:** both root and SvelteKit npm lockfiles are committed, and CI installs with `npm ci`. To update dependencies intentionally, regenerate lockfiles with `npm run lock:bootstrap`.
-- **Automated CI workflow** checks the engine, SvelteKit build and Chromium/axe across all brands and modes. Status and run logs: [GitHub Actions](https://github.com/NuBlox/Color-Foundry/actions).
+- **Lockfile bootstrap:** a script generates both npm lockfiles on an online machine. CI uses `npm ci` automatically once those lockfiles have been committed. Both lockfiles are committed for `npm ci` reproducibility.
+- **Automated CI workflow** is configured for the engine, SvelteKit build and Chromium/axe checks for all brands and both modes; the online workflow has run successfully on the `NuBlox/Color-Foundry` GitHub repository.
 
 ## Quick start
 
@@ -102,7 +112,7 @@ node --check examples/generate-tokens.mjs
 npm run brand:tokens
 ```
 
-The TypeScript engine, token validation and exports are covered by automated tests. The **SvelteKit build and Playwright/axe suite remain unverified in this container** because DNS for the npm registry is blocked. However, the generated CSS cascade has now been verified in a real Chromium process using Python Playwright (20 browser configurations and 200 pixel-colour comparisons). Run the starter checks and browser tests on your Mac or use the included GitHub Actions CI workflow.
+The TypeScript engine, token validation and exports are covered by automated tests. The **SvelteKit build and Playwright/axe suite passed in GitHub Actions for v0.8**; run CI again on the v0.9 change. A local full SvelteKit install still requires npm registry access. However, the generated CSS cascade has now been verified in a real Chromium process using Python Playwright (20 browser configurations and 200 pixel-colour comparisons). Run the starter checks and browser tests on your Mac or use the included GitHub Actions CI workflow.
 
 ### Reproducible lockfiles and independent Chromium smoke test
 
@@ -116,7 +126,7 @@ python3 -m playwright install chromium
 npm run test:chromium
 ```
 
-Both `package-lock.json` files are committed to the repository; CI now requires deterministic `npm ci` installs. Python Playwright's CSS check does not replace a SvelteKit build, axe or a manual accessibility audit. Full details are in [RELEASE_0_8.md](docs/RELEASE_0_8.md). An axe pass does not certify WCAG compliance.
+The two `package-lock.json` files must be **committed to the eventual repository** before CI becomes deterministic. Without them CI currently emits explicit warnings and falls back to `npm install`. Python Playwright's CSS check does not replace a SvelteKit build, axe or a manual accessibility audit. Full details are in [RELEASE_0_8.md](docs/RELEASE_0_8.md). An axe pass does not certify WCAG compliance.
 
 ## Prior mathematical and perceptual work
 

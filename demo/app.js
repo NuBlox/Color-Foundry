@@ -1,4 +1,4 @@
-import { createPalette, optimizePalette, createDesignSystem, bestForeground, simulateVision, STOPS } from '../dist/index.js';
+import { createPalette, optimizePalette, createDesignSystem, createCategoricalPalette, bestForeground, simulateVision, STOPS } from '../dist/index.js';
 
 const byId = id => document.getElementById(id);
 const scaleNames = [
@@ -122,7 +122,32 @@ function renderOptimisation(palette) {
   for(const caution of r.cautions){const p=document.createElement('p');p.className='footnote';p.textContent=caution;root.append(p);}
 }
 
-function render() {renderScales(current);renderPreview(current);renderOptimisation(current);}
+let categorical;
+function renderCategories() {
+  const background=current[byId('theme-select').value].background;
+  categorical=createCategoricalPalette(current.seed, {
+    count:Number(byId('category-count').value || 8),
+    minBackgroundContrast:Number(byId('category-contrast').value || 3),
+    background,
+  });
+  const root=byId('category-colors');root.replaceChildren();
+  byId('category-preview').style.backgroundColor=simulateVision(background,visionMode());
+  for (const swatch of categorical.colors) {
+    const button=document.createElement('button');
+    const appearance=simulateVision(swatch.hex,visionMode());
+    button.type='button';button.className='category-swatch';
+    button.style.backgroundColor=appearance;
+    button.style.color=bestForeground(appearance).hex;
+    const label=document.createElement('span');label.textContent=`${swatch.index} · ${swatch.hex}`;
+    button.append(label);
+    button.setAttribute('aria-label',`Category ${swatch.index}: ${swatch.hex}. Copy colour`);
+    button.addEventListener('click',()=>copy(swatch.hex,swatch.hex));
+    root.append(button);
+  }
+  const weakest=categorical.weakestPair;
+  byId('category-report').textContent=`${categorical.evaluatedCandidates} feasible candidates · ${categorical.colors.length} colours · weakest ΔEOK ${weakest.distance.toFixed(3)} (categories ${weakest.first}/${weakest.second}, ${weakest.mode}) · minimum mark/background contrast ${categorical.minBackgroundContrast}:1. Click a colour to copy it.`;
+}
+function render() {renderScales(current);renderPreview(current);renderOptimisation(current);renderCategories();}
 function update(value){
   try {
     current=createPalette(value);
@@ -139,8 +164,8 @@ function update(value){
 byId('color-picker').addEventListener('input',e=>update(e.target.value));
 byId('hex-input').addEventListener('change',e=>update(e.target.value));
 byId('hex-input').addEventListener('keydown',e=>{if(e.key==='Enter')update(e.target.value);});
-byId('theme-select').addEventListener('change',()=>renderPreview(current));
-byId('vision-select').addEventListener('change',()=>{renderScales(current);renderPreview(current);});
+byId('theme-select').addEventListener('change',()=>{renderPreview(current);renderCategories();});
+byId('vision-select').addEventListener('change',()=>{renderScales(current);renderPreview(current);renderCategories();});
 byId('optimize-button').addEventListener('click',()=>{
   try {
     const button=byId('optimize-button');button.disabled=true;
@@ -174,6 +199,10 @@ byId('download-json-button').addEventListener('click',()=>
   download(JSON.stringify(current,null,2)+'\n','application/json',`palette-${current.seed.slice(1)}.json`));
 render();
 
+byId('category-count').addEventListener('change',renderCategories);
+byId('category-contrast').addEventListener('change',renderCategories);
+byId('download-category-button').addEventListener('click',()=>
+  download(categorical.css,'text/css',`categorical-${current.seed.slice(1)}.css`));
 byId('download-system-button').addEventListener('click',()=>
   download(createDesignSystem(current).css,'text/css',`design-system-${current.seed.slice(1)}.css`));
 byId('download-dtcg-light-button').addEventListener('click',()=>

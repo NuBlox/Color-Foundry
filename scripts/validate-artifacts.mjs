@@ -2,7 +2,7 @@
  * Results are deterministic and printable as a machine-readable JSON report.
  */
 import assert from 'node:assert/strict';
-import {createDesignSystem,createPalette,optimizePalette,validateDTCGTokens,validateCSSReferences} from '../dist/index.js';
+import {createDesignSystem,createPalette,optimizePalette,validateDTCGTokens,validateCSSReferences,createCategoricalPalette} from '../dist/index.js';
 
 const seeds=['#2563EB','#237A48','#A33A36','#808080','#F3E7C9'];
 const reports=[];
@@ -20,10 +20,13 @@ for(const seed of seeds){
   assert.equal(css,alternate.css,'Output must be deterministic');
   reports.push({seed,contrastChecks:checks.length,tokenCounts:[modes.light.tokenCount,modes.dark.tokenCount],css:variables});
 }
+const categories=createCategoricalPalette('#2563EB',{count:12,background:'#101827'});
+assert.equal(categories.colors.length,12);
+assert.ok(categories.colors.every(c=>c.backgroundContrast>=3 && c.labelContrast>=4.5));
 const optimized=optimizePalette('#2563EB',{intent:'balanced',effort:'fast'});
 const opt=createDesignSystem(optimized);
 assert.ok([...optimized.checks.light,...optimized.checks.dark,...optimized.interactionChecks.light,...optimized.interactionChecks.dark].every(c=>c.pass));
 validateDTCGTokens(opt.tokens.light);
 validateDTCGTokens(opt.tokens.dark);
 validateCSSReferences(opt.css);
-console.log(JSON.stringify({release:'0.8.0',seedSamples:reports.length,optimizedSampleValidated:true,report:reports},null,2));
+console.log(JSON.stringify({release:'0.9.0',categoricalSampleValidated:true,seedSamples:reports.length,optimizedSampleValidated:true,report:reports},null,2));
