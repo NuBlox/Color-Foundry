@@ -1,0 +1,68 @@
+name: Color Foundry CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install (locked when available)
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --no-audit --no-fund
+          else
+            echo '::warning::Root lockfile missing. Run npm run lock:bootstrap and commit it.'
+            npm install --no-audit --no-fund
+          fi
+      - run: npm run ci
+      - run: npm run brand:tokens
+      - run: node --check demo/app.js
+      - run: node --check examples/sveltekit/scripts/generate.mjs
+
+  sveltekit:
+    needs: engine
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/sveltekit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install root engine and compile
+        working-directory: .
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --no-audit --no-fund
+          else
+            echo '::warning::Root lockfile missing; installing nonlocked dependencies.'
+            npm install --no-audit --no-fund
+          fi
+          npm run build
+      - name: Install SvelteKit (locked when available)
+        run: |
+          if [[ -f package-lock.json ]]; then
+            npm ci --no-audit --no-fund
+          else
+            echo '::warning::SvelteKit lockfile missing. Run npm run lock:bootstrap at repository root and commit it.'
+            npm install --no-audit --no-fund
+          fi
+      - run: npm run tokens
+      - run: npm run check
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: color-foundry-playwright-report
+          path: examples/sveltekit/playwright-report/
+          retention-days: 7

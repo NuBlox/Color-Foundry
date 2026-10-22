@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Color Foundry — Mathematical CSS palettes</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div class="logo"><span class="logo-mark">C</span><div><b>Color Foundry</b><small>Mathematical design token engine</small></div></div>
+      <div class="version">ENGINE v0.8 · OKLCH / P3 / DTCG / SVELTEKIT</div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <span class="eyebrow">PERCEPTUAL COLOUR ENGINEERING</span>
+        <h1>Make a colour. <em>Build a system.</em></h1>
+        <p>From one source colour to 13 coordinated families, 143 perceptually spaced swatches, Display P3 enhancements, status roles, and contrast-audited light/dark interaction states.</p>
+      </section>
+
+      <section class="controls" aria-label="Palette controls">
+        <div class="control-group"><label for="color-picker">Starting colour</label><div class="picker-row"><input type="color" id="color-picker" value="#2563eb" aria-label="Pick a starting colour"><input id="hex-input" type="text" value="#2563EB" maxlength="7" autocomplete="off" spellcheck="false" aria-label="Hex colour"></div></div>
+        <div class="control-group"><label for="theme-select">Preview theme</label><select id="theme-select"><option value="light">Light mode</option><option value="dark">Dark mode</option></select></div><div class="control-group"><label for="vision-select">Vision simulation</label><select id="vision-select"><option value="normal">Standard vision</option><option value="protanopia">Protanopia</option><option value="deuteranopia">Deuteranopia</option><option value="tritanopia">Tritanopia</option></select></div>
+        <div class="button-group"><button type="button" class="button-secondary" id="random-button">Randomise seed</button><button type="button" class="button-primary" id="download-button">Export CSS ↓</button></div>
+      </section>
+      <div class="optimizer-controls" aria-label="Palette optimisation">
+        <div class="control-group"><label for="intent-select">Design intent</label><select id="intent-select"><option value="balanced">Balanced</option><option value="vibrant">Vibrant</option><option value="restrained">Restrained</option></select></div>
+        <button class="button-primary optimize-button" type="button" id="optimize-button">Optimise palette</button>
+        <button class="button-secondary optimize-button" type="button" id="download-json-button">Export JSON ↓</button>
+        <p>Searches candidate palettes. Failing contrast pairs are rejected; CVD separation is a soft objective, not a compliance claim.</p>
+      </div>
+      <div class="token-export" aria-label="Design system exports">
+        <div><strong>NEW · Full design system</strong><p>Export namespaced CSS design tokens, or portable DTCG 2025.10 JSON for each theme. Includes 143 raw tones, 252 tokens per theme, component roles, spacing, radii, typography and motion.</p></div>
+        <button class="button-primary" type="button" id="download-system-button">Design system CSS ↓</button>
+        <button class="button-secondary" type="button" id="download-dtcg-light-button">Light tokens ↓</button>
+        <button class="button-secondary" type="button" id="download-dtcg-dark-button">Dark tokens ↓</button>
+      </div>
+      <p id="error" class="error" aria-live="polite" hidden></p>
+
+      <section class="metrics" aria-label="Palette statistics">
+        <div class="metric"><span>GENERATED COLOURS</span><strong>143</strong><small>13 families × 11 tones</small></div>
+        <div class="metric"><span>PERCEPTUAL MODEL</span><strong>OKLab</strong><small>Arc-length interpolation</small></div>
+        <div class="metric"><span>CONTRAST AUDIT</span><strong id="audit-count">78 / 78</strong><small>Automated role checks</small></div>
+        <div class="metric"><span>OPTIMISATION SCORE</span><strong id="objective-score">—</strong><small id="objective-subtitle">Run optimiser to score</small></div>
+      </section>
+
+      <section class="section" aria-labelledby="optimisation-title">
+        <div class="section-title"><div><span class="eyebrow">00 / OPTIMISATION</span><h2 id="optimisation-title">Constraint-based palette search</h2></div><span class="section-note">Engineering score, not subjective beauty</span></div>
+        <div id="optimization-detail" class="optimisation-detail" aria-live="polite"></div>
+      </section>
+
+      <section class="section" aria-labelledby="swatches-title">
+        <div class="section-title"><div><span class="eyebrow">01 / GENERATION</span><h2 id="swatches-title">Perceptually spaced scales</h2></div><span class="section-note">Simulations affect the preview, not the copied hex</span></div>
+        <div id="scales" class="scale-list"></div><p class="footnote">Display P3 tokens are exported separately behind feature and gamut checks. A standard sRGB display shows the fallback colours.</p>
+      </section>
+
+      <section class="section" aria-labelledby="theme-title">
+        <div class="section-title"><div><span class="eyebrow">02 / APPLICATION</span><h2 id="theme-title">Live interface preview</h2></div><span class="section-note">WCAG-tested semantic tokens</span></div>
+        <div id="preview" class="preview">
+          <div class="preview-nav"><strong>Studio Workspace</strong><span>Overview &nbsp; / &nbsp; Settings &nbsp; / &nbsp; Profile</span></div>
+          <div class="preview-content"><div class="preview-left"><div class="mini-eyebrow">YOUR WORKSPACE</div><h3>Beautiful colour, by design.</h3><p>Generated from a single colour and built for readable, consistent interfaces.</p><div class="actions"><button class="preview-primary" type="button">Primary action</button><button class="preview-secondary" type="button">Secondary action</button></div></div><div class="preview-panel"><span class="mini-eyebrow">PALETTE STATUS</span><div class="preview-check"><span class="status-dot"></span> Contrast validation enabled</div><p>Accessibility is checked against the actual output values, not just the idealised input model.</p><a href="#audit-title" class="preview-link">View contrast details →</a></div></div>
+          <div class="interaction-gallery" aria-label="Interactive states">
+            <button type="button" class="state-demo state-primary">Hover or press</button>
+            <button type="button" class="state-demo state-secondary">Secondary state</button>
+            <button type="button" class="state-demo state-selected" aria-pressed="true">✓ Selected</button>
+            <button type="button" class="state-demo state-disabled" disabled>Disabled</button>
+            <span class="tint-sample">Tinted surface</span>
+            <span class="scrim-sample" aria-label="Decorative dimming scrim">Scrim example</span>
+          </div>
+          <div class="status-preview" aria-label="Semantic status states"><span class="status-chip success">✓ Success</span><span class="status-chip warning">! Warning</span><span class="status-chip danger">× Danger</span><span class="status-chip info">i Information</span></div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="vision-title"><div class="section-title"><div><span class="eyebrow">03 / PERCEPTION</span><h2 id="vision-title">Colour-vision simulation</h2></div><span class="section-note">Quantitative model, not medical testing</span></div><p id="vision-report" class="footnote"></p><p class="footnote">Never encode critical meaning by colour alone. Icons and written labels remain mandatory design requirements; these simulations do not establish accessibility conformance.</p></section>
+
+      <section class="section" aria-labelledby="audit-title"><div class="section-title"><div><span class="eyebrow">04 / VALIDATION</span><h2 id="audit-title">Contrast report</h2></div><span id="audit-label" class="audit-pill">78 rules checked</span></div><div class="table-wrap"><table><thead><tr><th>Theme</th><th>Token relationship</th><th>Computed</th><th>Required</th><th>Result</th></tr></thead><tbody id="audit-rows"></tbody></table></div><p class="footnote">Automated role checks are not a complete accessibility certification. Checks include selected opaque states and one tinted-surface alpha composite. Arbitrary stacking contexts, images, gradients, modal occlusion, disabled readability, and rendered-browser validation still require application-specific checks.</p></section>
+
+      <section class="section" aria-labelledby="css-title"><div class="section-title"><div><span class="eyebrow">05 / OUTPUT</span><h2 id="css-title">Production CSS variables</h2></div><button type="button" class="text-button" id="copy-css-button">Copy CSS</button></div><pre class="code"><code id="css-preview"></code></pre><p class="footnote">The download includes all 143 sRGB scales, Display P3 overrides, accessible interaction-state tokens, and audited semantic themes. Attach <code>data-theme="dark"</code> to your document root to activate the dark tokens.</p></section>
+    </main>
+    <footer>Color Foundry v0.8 · Deterministic and dependency-free · sRGB fallbacks + Display P3.</footer>
+  </div>
+  <div role="status" aria-live="polite" class="toast" id="toast"></div>
+</body>
+</html>

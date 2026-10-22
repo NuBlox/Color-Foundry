@@ -1,0 +1,39 @@
+{
+  "name": "color-foundry-engine",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "description": "OKLCH palette and multi-brand design-token engine with independently audited light/dark themes and SvelteKit integration",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "demo": "npm run build && python3 -m http.server 8000",
+    "tokens": "node examples/generate-tokens.mjs",
+    "validate": "npm run build && node scripts/validate-artifacts.mjs",
+    "ci": "npm run check && npm test && npm run validate",
+    "test:chromium": "npm run test:css-browser",
+    "brand:tokens": "npm run build && node examples/sveltekit/scripts/generate.mjs",
+    "lock:bootstrap": "bash scripts/bootstrap-lockfiles.sh",
+    "test:css-browser": "npm run brand:tokens && python3 scripts/check-css-browser.py"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "docs"
+  ]
+}
