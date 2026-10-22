@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const names = {
@@ -7,8 +7,13 @@ const names = {
   plum: 'Royal Plum',
 } as const;
 
-test('renders a multi-brand SvelteKit application with accessible controls', async ({page}) => {
+async function navigate(page: Page) {
   await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-cf-hydrated', 'true');
+}
+
+test('renders a multi-brand SvelteKit application with accessible controls', async ({page}) => {
+  await navigate(page);
   await expect(page.getByRole('heading',{name:'Multiple brands. One design system.'})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Status tokens'})).toBeVisible();
   await expect(page.locator('.ramp-cell')).toHaveCount(11);
@@ -18,7 +23,7 @@ test('renders a multi-brand SvelteKit application with accessible controls', asy
 });
 
 test('explicit themes override OS preference and persist after reload',async({page})=>{
-  await page.goto('/');
+  await navigate(page);
   await page.getByRole('button',{name:'dark',exact:true}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   const darkBackground=await page.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor);
@@ -33,7 +38,7 @@ test('explicit themes override OS preference and persist after reload',async({pa
 });
 
 test('brand switching changes computed semantic colours and survives reload',async({page})=>{
-  await page.goto('/');
+  await navigate(page);
   const button = page.getByRole('button',{name:'Primary action'});
   const color=()=>button.evaluate(e=>getComputedStyle(e).backgroundColor);
   const baseline=await color();
@@ -54,7 +59,7 @@ test('brand switching changes computed semantic colours and survives reload',asy
 
 test('OS dark mode applies the selected brand and manual light takes precedence',async({page})=>{
   await page.emulateMedia({colorScheme:'light'});
-  await page.goto('/');
+  await navigate(page);
   await page.getByLabel('Brand').selectOption('forest');
   const body=page.locator('body');
   const background=()=>body.evaluate(e=>getComputedStyle(e).backgroundColor);
@@ -69,7 +74,7 @@ test('OS dark mode applies the selected brand and manual light takes precedence'
 });
 
 test('controls have keyboard focus and the selection control exposes state',async({page})=>{
-  await page.goto('/');
+  await navigate(page);
   const button=page.getByRole('button',{name:'Primary action'});
   for(let i=0;i<20;i++) {
     if(await button.evaluate(e=>document.activeElement===e)) break;
@@ -86,7 +91,7 @@ test('controls have keyboard focus and the selection control exposes state',asyn
 for(const brand of Object.keys(names) as Array<keyof typeof names>){
   for(const mode of ['light','dark'] as const) {
     test(`axe WCAG A/AA audit: ${names[brand]}, ${mode}`,async({page})=>{
-      await page.goto('/');
+      await navigate(page);
       await page.getByLabel('Brand').selectOption(brand);
       await page.getByRole('button',{name:mode,exact:true}).click();
       await expect(page.locator('.ramp-cell')).toHaveCount(11);
@@ -100,15 +105,19 @@ for(const brand of Object.keys(names) as Array<keyof typeof names>){
 
 test('a persisted supported brand restores before hydration; invalid brand is discarded', async ({page}) => {
   await page.addInitScript(() => {
+    // init scripts run again on reload; seed once so the invalid-brand test is meaningful.
+    if (sessionStorage.getItem('cf-test-seeded')) return;
+    sessionStorage.setItem('cf-test-seeded', '1');
     localStorage.setItem('color-foundry-brand', 'forest');
     localStorage.setItem('color-foundry-theme', 'dark');
   });
-  await page.goto('/');
+  await navigate(page);
   await expect(page.locator('html')).toHaveAttribute('data-brand', 'forest');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.getByLabel('Brand')).toHaveValue('forest');
   await page.evaluate(() => localStorage.setItem('color-foundry-brand', 'nonexistent'));
   await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-cf-hydrated', 'true');
   await expect(page.locator('html')).not.toHaveAttribute('data-brand');
   await expect(page.getByLabel('Brand')).toHaveValue('foundry');
   expect(await page.evaluate(() => localStorage.getItem('color-foundry-brand'))).toBeNull();

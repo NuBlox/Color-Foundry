@@ -1,6 +1,6 @@
 # Color Foundry v0.8 — release validation
 
-This is a **source release**, not a published package or a verified SvelteKit production build.
+This is a **source release** in [NuBlox/Color-Foundry](https://github.com/NuBlox/Color-Foundry), not an npm-published package or a whole-interface WCAG certification.
 
 ## Verified in the authoring environment
 
@@ -11,25 +11,26 @@ This is a **source release**, not a published package or a verified SvelteKit pr
 - CSS browser checks use each brand's generated DTCG token document, resolving colour aliases to the expected sRGB HEX before comparing actual computed RGB pixel values.
 - Shell and Python script syntax checks, and generated artifacts validation.
 
-## What is still *not* verified
+## Online CI and remaining verification
 
-- SvelteKit's TypeScript/Svelte compiler run, production bundling and actual hydrated application rendering. No dependency install could be completed: npm registry DNS resolution fails (`EAI_AGAIN`).
-- The `@playwright/test` + axe-core SvelteKit suite has not run. It is configured to check WCAG-tagged violations of **all severities** on desktop and mobile for each brand and mode.
-- Lockfiles cannot be generated offline from this project (registry metadata and integrity hashes are required). The bootstrap helper is supplied and needs an online npm install. CI uses `npm ci` when lockfiles are available and otherwise emits an explicit warning before using `npm install`.
-- No Git remote, main-branch merge, GitHub Actions execution, publishing or independent WCAG conformance certification.
+- GitHub Actions has successfully installed dependencies, type-checked and built the SvelteKit application. The first Playwright run uncovered hydration-timing and test-fixture persistence issues. These have been addressed in the accompanying changes, subject to CI confirmation.
+- The root and SvelteKit npm lockfiles were exported from the online GitHub Actions runner and are now committed for `npm ci` reproducibility.
+- The full Playwright/axe suite is the release gate. Passing axe automation does not certify screen-reader usability, all interactive states, or entire-interface WCAG conformance.
+- Colour-managed Display P3 hardware rendering and external usability evaluation remain outstanding.
 
 ## Run on macOS (online)
 
 ```bash
-unzip ~/Downloads/Color-Foundry-v0.8.zip -d ~/Developer
-cd ~/Developer/color-foundry
-npm run lock:bootstrap   # Requires npm registry; produces root and starter lockfiles
+git clone https://github.com/NuBlox/Color-Foundry.git ~/Developer/Color-Foundry
+cd ~/Developer/Color-Foundry
+npm ci
 npm run ci
 npm run brand:tokens
 python3 -m pip install playwright
 python3 -m playwright install chromium
 npm run test:chromium
 cd examples/sveltekit
+npm ci
 npm run check
 npm run build
 npx playwright install chromium
@@ -37,7 +38,7 @@ npm run test:e2e
 npm run dev
 ```
 
-**Repository follow-up:** create or select the intended GitHub repository, commit the source and both lockfiles, push a branch, run GitHub Actions, resolve failures, merge into `main`, and clean up the task branch. No repository was selected or changed in this environment.
+**Repository:** source is hosted on `main`; check [GitHub Actions](https://github.com/NuBlox/Color-Foundry/actions) for the latest CI conclusion before declaring the release fully verified.
 
 ## Scope of browser validation
 

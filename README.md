@@ -16,8 +16,8 @@ Deterministic TypeScript with **no runtime dependencies**. Generates OKLCH-deriv
 - **Multi-brand composition:** one shared CSS namespace with independently audited light/dark palettes for Foundry Blue, Evergreen and Royal Plum; brand selection is separate from theme selection.
 - **Chromium-verified token cascade:** optional Python Playwright test checks 200 browser-computed values across 20 explicit/OS/override/fallback configurations, using generated DTCG documents as the expected source.
 - **Generalised pre-paint brand restoration:** supports any valid configured brand slug and cleans up unknown stored brands after hydration.
-- **Lockfile bootstrap:** a script generates both npm lockfiles on an online machine. CI uses `npm ci` automatically once those lockfiles have been committed. Neither lockfile is present yet because npm registry DNS is blocked here.
-- **Automated CI workflow** is configured for the engine, SvelteKit build and Chromium/axe checks for all brands and both modes; the online workflow is not yet executed against a repository.
+- **Reproducible builds:** both root and SvelteKit npm lockfiles are committed, and CI installs with `npm ci`. To update dependencies intentionally, regenerate lockfiles with `npm run lock:bootstrap`.
+- **Automated CI workflow** checks the engine, SvelteKit build and Chromium/axe across all brands and modes. Status and run logs: [GitHub Actions](https://github.com/NuBlox/Color-Foundry/actions).
 
 ## Quick start
 
@@ -116,7 +116,7 @@ python3 -m playwright install chromium
 npm run test:chromium
 ```
 
-The two `package-lock.json` files must be **committed to the eventual repository** before CI becomes deterministic. Without them CI currently emits explicit warnings and falls back to `npm install`. Python Playwright's CSS check does not replace a SvelteKit build, axe or a manual accessibility audit. Full details are in [RELEASE_0_8.md](docs/RELEASE_0_8.md). An axe pass does not certify WCAG compliance.
+Both `package-lock.json` files are committed to the repository; CI now requires deterministic `npm ci` installs. Python Playwright's CSS check does not replace a SvelteKit build, axe or a manual accessibility audit. Full details are in [RELEASE_0_8.md](docs/RELEASE_0_8.md). An axe pass does not certify WCAG compliance.
 
 ## Prior mathematical and perceptual work
 
