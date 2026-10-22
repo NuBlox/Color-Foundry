@@ -29,6 +29,8 @@
         delete document.documentElement.dataset.brand;
       }
     } catch { /* Use system preference when storage is unavailable. */ }
+    // Expose a deterministic hydration signal for browser tests and clients.
+    document.documentElement.dataset.cfHydrated = 'true';
   });
 
   function setBrand(value: string) {
