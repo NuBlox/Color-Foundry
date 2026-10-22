@@ -13,14 +13,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install (locked when available)
-        run: |
-          if [[ -f package-lock.json ]]; then
-            npm ci --no-audit --no-fund
-          else
-            echo '::warning::Root lockfile missing. Run npm run lock:bootstrap and commit it.'
-            npm install --no-audit --no-fund
-          fi
+      - name: Install (locked)
+        run: npm ci --no-audit --no-fund
       - run: npm run ci
       - run: npm run brand:tokens
       - run: node --check demo/app.js
@@ -40,35 +34,14 @@ jobs:
       - name: Install root engine and compile
         working-directory: .
         run: |
-          if [[ -f package-lock.json ]]; then
-            npm ci --no-audit --no-fund
-          else
-            echo '::warning::Root lockfile missing; installing nonlocked dependencies.'
-            npm install --no-audit --no-fund
-          fi
+          npm ci --no-audit --no-fund
           npm run build
-      - name: Install SvelteKit (locked when available)
-        run: |
-          if [[ -f package-lock.json ]]; then
-            npm ci --no-audit --no-fund
-          else
-            echo '::warning::SvelteKit lockfile missing. Run npm run lock:bootstrap at repository root and commit it.'
-            npm install --no-audit --no-fund
+      - name: Install SvelteKit (locked)
+        run: npm ci --no-audit --no-fund
           fi
       - run: npm run tokens
       - run: npm run check
       - run: npm run build
-      # npm install creates lockfiles on a networked runner when absent.
-      # Export them so they can be committed for reproducible npm ci builds.
-      - name: Export generated npm lockfiles
-        uses: actions/upload-artifact@v4
-        with:
-          name: color-foundry-lockfiles
-          path: |
-            package-lock.json
-            examples/sveltekit/package-lock.json
-          if-no-files-found: error
-          retention-days: 7
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
