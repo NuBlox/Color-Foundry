@@ -67,7 +67,10 @@
         </div>
         <div id="category-preview" class="category-preview"><div id="category-colors" class="category-colors"></div></div>
         <p id="category-report" class="footnote" aria-live="polite"></p>
-        <p class="footnote">Colour-vision simulations are approximate. Charts and maps still need explicit labels, line styles, symbols or patterns; contrast against a solid background does not certify an entire chart.</p>
+        <div class="chart-controls"><label for="chart-opacity">Chart mark opacity</label><select id="chart-opacity"><option value="1" selected>100%</option><option value="0.8">80%</option><option value="0.6">60%</option><option value="0.4">40%</option></select><button type="button" class="button-secondary" id="download-chart-button">Export chart SVG ↓</button></div>
+        <p id="chart-report" class="footnote" aria-live="polite"></p>
+        <div id="chart-fixture" class="chart-fixture" aria-label="Line chart with labels and varied line symbols"></div>
+        <p class="footnote">Generated example uses synthetic data and redundant line markers, strokes and direct series labels. A real chart must supply an accessible data table. The audit checks solid surface pixels; antialiasing and overlapping marks still require manual review.</p>
       </section>
 
       <section class="section" aria-labelledby="theme-title">
@@ -93,7 +96,7 @@
 
       <section class="section" aria-labelledby="css-title"><div class="section-title"><div><span class="eyebrow">05 / OUTPUT</span><h2 id="css-title">Production CSS variables</h2></div><button type="button" class="text-button" id="copy-css-button">Copy CSS</button></div><pre class="code"><code id="css-preview"></code></pre><p class="footnote">The download includes all 143 sRGB scales, Display P3 overrides, accessible interaction-state tokens, and audited semantic themes. Attach <code>data-theme="dark"</code> to your document root to activate the dark tokens.</p></section>
     </main>
-    <footer>Color Foundry v0.9 · Deterministic and dependency-free · sRGB fallbacks + Display P3.</footer>
+    <footer>Color Foundry v0.10 · Deterministic and dependency-free · sRGB fallbacks + Display P3.</footer>
   </div>
   <div role="status" aria-live="polite" class="toast" id="toast"></div>
 </body>

@@ -1,6 +1,18 @@
-# Color Foundry v0.9 — perceptual palette and categorical colour engine
+# Color Foundry v0.10 — chart-context perceptual audit
 
 Deterministic TypeScript with **no runtime dependencies**. Generates OKLCH-derived sRGB/Display P3 colour scales, contrast-audited light/dark semantic roles, interaction states and reusable design tokens for SvelteKit.
+
+## v0.10: chart context, transparent marks and perceptual inspection
+
+The new `auditCategoricalChart()` API evaluates each generated category over multiple real chart backgrounds **after alpha compositing**, recomputes mark/background contrast and reports the weakest colour-pair separation under simulated vision deficiencies. `renderCategoricalChartFixture()` produces a deterministic synthetic SVG line chart with redundant dash styles, varied point markers and direct labels. The standalone demo includes opacity controls and SVG export. **This is an engineering audit, not empirical validation or a WCAG certification.** See [CHART_CONTEXT.md](docs/CHART_CONTEXT.md) for formulas, limitations and the human-testing protocol.
+
+```ts
+import {createCategoricalPalette, auditCategoricalChart, renderCategoricalChartFixture} from 'color-foundry-engine';
+const palette=createCategoricalPalette('#2563EB',{count:8});
+const report=auditCategoricalChart(palette,{surfaces:[{name:'page',hex:'#FFFFFF'},{name:'card',hex:'#F6F8FC'}],opacity:0.75});
+console.log(report.passed,report.failures,report.weakestPair);
+const svg=renderCategoricalChartFixture(palette);
+```
 
 ## v0.9: categorical colour generation
 
@@ -102,6 +114,8 @@ Open Vite's local URL (normally `http://localhost:5173`). Change the default bra
 The starter uses Svelte 5/SvelteKit 2, does not need a database, and includes no migrations. For full run details and architecture see [DESIGN_TOKENS.md](docs/DESIGN_TOKENS.md) and [MULTI_BRAND.md](docs/MULTI_BRAND.md).
 
 ## Verification
+
+The v0.10 local suite has 59 engine and preview-DOM tests. The full SvelteKit/Playwright CI and graphical rendering need independent verification for this commit.
 
 ```bash
 npm run check

@@ -7,3 +7,5 @@ export * from './interaction.js';
 export * from './design-system.js';
 export * from './validation.js';
 export * from './categorical.js';
+
+export * from './chart-audit.js';

@@ -37,9 +37,12 @@ test('browser entrypoint initialises controls, builds 143 swatches, and changes 
   get('category-count').value = '8';
   get('category-contrast').value = '3';
   get('vision-select').value = 'normal';
+  get('chart-opacity').value = '1';
   await import('../demo/app.js');
   assert.equal(get('scales').children.length,13);
   assert.equal(get('category-colors').children.length,8);
+  assert.match(get('chart-report').textContent,/16\/16 mark\/surface checks passed/);
+  assert.match(get('chart-fixture').innerHTML,/<svg/);
   assert.match(get('category-report').textContent,/weakest ΔEOK/);
   const count=get('scales').children.reduce((total,row)=>total + row.children.at(-1).children.length,0);
   assert.equal(count,143);
@@ -73,5 +76,9 @@ test('browser entrypoint initialises controls, builds 143 swatches, and changes 
   get('category-count').listeners.get('change')();
   assert.equal(get('category-colors').children.length,12);
   assert.equal(typeof get('download-category-button').listeners.get('click'),'function');
+  get('chart-opacity').value='0.4';
+  get('chart-opacity').listeners.get('change')();
+  assert.match(get('chart-report').textContent,/mark\/surface checks passed/);
+  assert.equal(typeof get('download-chart-button').listeners.get('click'),'function');
   // A DOM-API interaction smoke test, not a rendered-browser accessibility audit.
 });

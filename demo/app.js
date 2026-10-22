@@ -1,4 +1,4 @@
-import { createPalette, optimizePalette, createDesignSystem, createCategoricalPalette, bestForeground, simulateVision, STOPS } from '../dist/index.js';
+import { createPalette, optimizePalette, createDesignSystem, createCategoricalPalette, bestForeground, simulateVision, auditCategoricalChart, renderCategoricalChartFixture, STOPS } from '../dist/index.js';
 
 const byId = id => document.getElementById(id);
 const scaleNames = [
@@ -145,7 +145,22 @@ function renderCategories() {
     root.append(button);
   }
   const weakest=categorical.weakestPair;
+  renderChartAudit();
   byId('category-report').textContent=`${categorical.evaluatedCandidates} feasible candidates · ${categorical.colors.length} colours · weakest ΔEOK ${weakest.distance.toFixed(3)} (categories ${weakest.first}/${weakest.second}, ${weakest.mode}) · minimum mark/background contrast ${categorical.minBackgroundContrast}:1. Click a colour to copy it.`;
+}
+let chartSvg='';
+function renderChartAudit() {
+  const mode = byId('theme-select').value;
+  const theme = current[mode];
+  const opacity = Number(byId('chart-opacity').value || 1);
+  const audit = auditCategoricalChart(categorical, {
+    opacity,
+    surfaces: [{name:'page',hex:theme.background},{name:'card',hex:theme.surface}],
+  });
+  const least = audit.weakestPair;
+  byId('chart-report').textContent = `${audit.markChecks.length-audit.failures}/${audit.markChecks.length} mark/surface checks passed at 3:1 · ${audit.reviewPairs} simulated pairs flagged for review · weakest pair ${least ? `${least.first}/${least.second} under ${least.weakestMode}` : 'none'}. Full-opacity SVG uses explicit line dashes, different markers and series labels.`;
+  chartSvg = renderCategoricalChartFixture(categorical, {title:'Synthetic multi-series chart'});
+  byId('chart-fixture').innerHTML = chartSvg;
 }
 function render() {renderScales(current);renderPreview(current);renderOptimisation(current);renderCategories();}
 function update(value){
@@ -209,3 +224,7 @@ byId('download-dtcg-light-button').addEventListener('click',()=>
   download(JSON.stringify(createDesignSystem(current).tokens.light,null,2)+'\n','application/json',`tokens-${current.seed.slice(1)}-light.json`));
 byId('download-dtcg-dark-button').addEventListener('click',()=>
   download(JSON.stringify(createDesignSystem(current).tokens.dark,null,2)+'\n','application/json',`tokens-${current.seed.slice(1)}-dark.json`));
+
+byId('chart-opacity').addEventListener('change', renderChartAudit);
+byId('download-chart-button').addEventListener('click',() =>
+  download(chartSvg,'image/svg+xml',`chart-${current.seed.slice(1)}.svg`));

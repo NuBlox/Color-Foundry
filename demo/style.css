@@ -141,3 +141,11 @@ footer { color:#9CA7B6; padding:30px 0 50px; font-size:12px; border-top:1px soli
 .category-swatch:focus-visible { outline:3px solid #126cc7;outline-offset:2px; }
 .category-swatch:hover { border-color:currentColor; }
 @media(max-width:600px) { .category-colors { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+/* v0.10: chart-context audit and synthetic line-chart inspection fixture */
+.chart-controls { display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px; }
+.chart-controls label {font-size:13px;font-weight:700;}
+.chart-controls select {min-height:38px;min-width:95px;padding:6px;}
+.chart-controls button {padding:10px 14px;}
+.chart-fixture {margin-top:14px;max-width:100%;overflow:auto;border:1px solid #d2dbe8;border-radius:12px;}
+.chart-fixture svg {width:100%;min-width:380px;height:auto;display:block;}
