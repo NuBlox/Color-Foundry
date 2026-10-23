@@ -4,7 +4,10 @@ export type OKLab = Readonly<{ l: number; a: number; b: number }>;
 export type OKLCH = Readonly<{ l: number; c: number; h: number }>;
 
 const clamp = (x: number, low = 0, high = 1): number => Math.min(high, Math.max(low, x));
-export const wrapHue = (h: number): number => ((h % 360) + 360) % 360;
+export function wrapHue(h: number): number {
+  if (!Number.isFinite(h)) throw new RangeError('Hue must be finite');
+  return ((h % 360) + 360) % 360;
+}
 const asByte = (x: number): number => Math.round(clamp(x) * 255);
 const linear = (c: number): number => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
 const gamma = (c: number): number => c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055;
@@ -23,6 +26,9 @@ export function parseHex(hex: string): RGB {
 }
 
 export function toHex(rgb: RGB): string {
+  if (![rgb.r, rgb.g, rgb.b].every(Number.isFinite)) {
+    throw new RangeError('RGB channels must be finite numbers');
+  }
   return '#' + [rgb.r, rgb.g, rgb.b]
     .map(c => asByte(c).toString(16).padStart(2, '0')).join('').toUpperCase();
 }
@@ -57,12 +63,16 @@ export function labToLch(lab: OKLab): OKLCH {
   return { l: lab.l, c, h: c < 0.000004 ? 0 : wrapHue(Math.atan2(lab.b, lab.a) * 180 / Math.PI) };
 }
 export function lchToLab(lch: OKLCH): OKLab {
+  if (![lch.l, lch.c, lch.h].every(Number.isFinite) || lch.c < 0) {
+    throw new RangeError('OKLCH requires finite L, C >= 0 and finite H');
+  }
   const radians = lch.h * Math.PI / 180;
   return { l: lch.l, a: lch.c * Math.cos(radians), b: lch.c * Math.sin(radians) };
 }
 export function hexToLch(hex: string): OKLCH { return labToLch(rgbToOKLab(parseHex(hex))); }
 
 export function inSRGB(linearRGB: RGB, epsilon = 0.0000001): boolean {
+  if (!Number.isFinite(epsilon) || epsilon < 0) throw new RangeError('Gamut tolerance must be finite and nonnegative');
   return [linearRGB.r, linearRGB.g, linearRGB.b].every(c => c >= -epsilon && c <= 1 + epsilon);
 }
 
